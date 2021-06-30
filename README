@@ -1,0 +1,212 @@
+======================== ISSUES LIST ==========================
+
+When looking at the API, only one code can be specified as below
+https://eodhistoricaldata.com/api/real-time/EUR.FOREX?api_token=OeAFFmMliFG5orCUuwAKQ8l4WWFQ67YX&fmt=json
+But if multi currency pair code provided, Developers using the API, do not need to call it multiple times as required.
+5 times call api?
+AUDUSD, AUDNZD, AUDHKD, AUDKRW and AUDJPY
+
+- Multiple API calls as required?
+1. Thread?
+2. EOD provides multi pair codes?
+3. Make Concurrent Service API Calls in Java Using Spring Boot (I found later and implemented it this way)
+
+Question: What are differences between AUD.FOREX and AUDUSD.FOREX?
+AUDUSD and AUD-USD are different?
+https://eodhistoricaldata.com/api/real-time/AUD.FOREX?api_token=60dac7fcd45851.04617375&fmt=json
+https://eodhistoricaldata.com/api/real-time/AUDUSD.FOREX?api_token=60dac7fcd45851.04617375&fmt=json
+
+Api says that It’s easy to use it, just add ‘FOREX’ postfix to any currency pair.
+Our example key works for EUR.FOREX currency pair. For example, historical data end of day data for EURO-USD:
+
+Question : What is rate in json format? open, high,low and change?
+{"code":"EUR.FOREX","timestamp":1625051100,"gmtoffset":0,"open":0.8401,"high":0.8412,"low":0.8392,"close":0.841,"volume":0,"previousClose":0.8406,"change":0.0004,"change_p":0.0476}
+
+- Make Concurrent Service API Calls in Java Using Spring Boot
+To be honest, this is my first time doing this and I think I need some more practice.
+
+I got an error message while making an API call using an array. Let's have break time?
+402 Payment Required: [You exceeded your daily API requests limit.  Please contact support@eodhistoricaldata.com]
+
+Reference :
+https://spring.io/guides/gs/async-method/
+
+
+- You should not have hardcoded API tokens and email addresses in your program
+API in application.yml file in resources directory
+Client's email address stored in table in database (MySQL)
+
+First, create a basic table with the customer's information like name and email address.
+Creating another tables contains currency pair code, e-mail time sent required by each customer.
+
+- CLIENT Table (CLIENT_ID, NAME, EMAIL)
+- Client_FX_CODE table (FX_CODE_ID, CLIENT_ID, CODE)
+
+I didn't create a table of email sending times for each customer this time.
+However, it is specified as a cron scheduler in the file.
+Please see application.yml file in resources directory.
+
+- Email Sending.
+In my previous developing experience, I developed as email templates using the Apache Velocity library.
+But this time, I just implemented a function to simply send an email with attached file (csv).
+
+According to previous development experience,
+When sending an email to multiple people, It must use threads.
+If not, only the last person will receive an email.
+
+- Row for each FX pair in CSV file.
+If big data and complex formatting in Excel file, I would have used Apache POI (poi-ooxml) as before.
+This time, using net.sf.supercsv library for creating simple csv file.
+
+- Lombok
+Implemented the Builder Design pattern rather than a constructor that takes multiple arguments.
+In order to make the complex code of the mapping file simple and easy to read.
+The files : Client.java, ClientFxCode.java
+
+
+- Gradle
+For library information required for Gradle, refer to the site below.
+https://mvnrepository.com/
+
+- JpaRepository (default query - findAll(), save(), delete(), findById())
+https://www.javaguides.net/2019/07/spring-data-jpa-save-findbyid-findall-deletebyid-example.html
+
+
+- Batch running in Spring Boot.
+Batch jobs for specific multiple times rather than a specific rule of time.
+specific time run in cron? (8am, 2pm and 4pm each day)
+
+I thought of several possibilities :
+1. Set it to run every hour in cron, check the current time to equal to 8am, 2pm and 4pm and run it?
+2. Does Spring Boot support setting multiple times?
+Not the regular time setting cron I know (every seconds, minutes, hours)
+-- best one if possible
+3. A thread that runs every hour
+
+In my experiences, Only one schedule every times or crontab in shell script in Linux/Unix System.
+In this case, I researched to find multi cron in Spring Boot.
+As a result of searching, it was implemented for second method.
+
+Differences between cron linux/unix and spring boot's cron
+@Scheduled(cron="0 0 8 * * *", zone="Australia/Sydney")
+
+- References
+https://stackoverflow.com/questions/40929161/spring-boot-one-scheduled-task-using-multiple-cron-expressions-from-yaml-file
+https://riptutorial.com/spring/example/21209/cron-expression
+
+
+** I am concerned about the implementation and completion of the function and , so if I have time, I need clean and refactoring code.
+
+- Table schema
+please see calibre.sql and image files for design and analysis.
+
+insert
+    into
+        calibre.client
+        (email, name, client_id)
+    values
+        ('jameshackerlee@gmail.com', 'James Lee', '06P6WvDXgBYRMFKtAl30')
+
++-------------------+
+| Tables_in_calibre |
++-------------------+
+| client            |
+| client_fx_code    |
++-------------------+
+2 rows in set (0.00 sec)
+
+mysql> desc client;
++-----------+--------------+------+-----+---------+-------+
+| Field     | Type         | Null | Key | Default | Extra |
++-----------+--------------+------+-----+---------+-------+
+| CLIENT_ID | char(20)     | NO   | PRI | NULL    |       |
+| NAME      | varchar(50)  | YES  |     | NULL    |       |
+| EMAIL     | varchar(100) | YES  |     | NULL    |       |
++-----------+--------------+------+-----+---------+-------+
+3 rows in set (0.00 sec)
+
+mysql> desc client_fx_code;
++------------+-------------+------+-----+---------+----------------+
+| Field      | Type        | Null | Key | Default | Extra          |
++------------+-------------+------+-----+---------+----------------+
+| FX_CODE_ID | int(10)     | NO   | PRI | NULL    | auto_increment |
+| CLIENT_ID  | char(20)    | NO   | MUL | NULL    |                |
+| CODE       | varchar(20) | YES  |     | NULL    |                |
++------------+-------------+------+-----+---------+----------------+
+3 rows in set (0.01 sec)
+
+
+AUDUSD, AUDNZD, AUDHKD, AUDKRW and AUDJPY
+
+insert
+    into
+        calibre.client_fx_code
+        (client_id, code)
+    values
+        ('06P6WvDXgBYRMFKtAl30', 'AUDUSD');
+
+insert
+    into
+        calibre.client_fx_code
+        (client_id, code)
+    values
+        ('06P6WvDXgBYRMFKtAl30', 'AUDNZD');
+
+insert
+    into
+        calibre.client_fx_code
+        (client_id, code)
+    values
+        ('06P6WvDXgBYRMFKtAl30', 'AUDHKD');
+
+insert
+    into
+        calibre.client_fx_code
+        (client_id, code)
+    values
+        ('06P6WvDXgBYRMFKtAl30', 'AUDKRW');
+
+insert
+    into
+        calibre.client_fx_code
+        (client_id, code)
+    values
+        ('06P6WvDXgBYRMFKtAl30', 'AUDJPY');
+
+
+
+
+============================== Check List ================================
+
+* Requirements for developers
+YES) - analytical, programming, and communication abilities.
+YES) - Willingness and determination to self-teach and experiment with tools
+YES) - Aptitude for learning complex new skills and problem-solving
+YES) - Ability to work without significant guidance
+
+* Provide us with a link to a GitHub Repository that contains your thoughts and answers that you created as part of your experiment.
+Note that presentation and communication ability are as important as technical answers.
+
+Fictional Use Case : Automated delivery of FX Data
+
+YES) 1. Client has asked for FX data to be sourced from API (eodhistoricaldata.com)
+YES) 2. Delivered as an email file attachment at 8am, 2pm and 4pm each day.
+YES) 3. The FX rates of interest are AUDUSD, AUDNZD, AUDHKD, AUDKRW and AUDJPY
+YES) The email file attachment will have:
+- a filename of obsval_YYYYMMDD_HHMM.csv e.g. obsval_20191015_0800.csv
+- a header row consisting of FOREX, VALUE
+- a row for each FX pair e.g. AUDUSD, .65
+
+Development environment
+- Spring Boot
+- Logback
+- Gradle
+- GitHub
+
+Please note:
+- other additional tools or libraries can be used as part of the experiment
+- your approach to unit testing is of interest
+- you should not have hardcoded API tokens and email addresses in your program
+- unrecoverable errors should send an email with exception details
+
+*** If you have questions, we suggest you make assumptions, document them in a README file, and continue the experiment

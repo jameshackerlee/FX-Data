@@ -1,0 +1,91 @@
+--- # profile mysql setting
+
+spring:
+  datasource:
+    hikari:
+      maximum-pool-size: 4 # database connection pool
+    driverClassName: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/{DATABASE}?characterEncoding=UTF-8&serverTimezone=UTC
+    username: {USER NAME}
+    password: {PASSWORD}
+
+  jpa:
+    properties:
+      hibernate:
+        format_sql: true
+        show_sql: true
+        use_sql_comment: true
+
+    # show-sql: true # DDL
+#    hibernate:
+#      ddl-auto: create
+
+--- # srping email
+
+spring:
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: {SENDER EMAIL ADDRESS}
+    password: {PASSWORD}
+    properties:
+      mail:
+        debug: true
+        transport:
+          protocol: smtp
+        smtp:
+          auth: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
+          starttls:             # TLS, port 587
+            enable: true
+
+
+--- # profile logging config
+
+# set loging level on each packages
+logging:
+  level:
+    root: INFO
+    org:
+      springframework: ERROR
+      hibernate:
+        type:
+          descriptor:
+            sql: trace
+    com:
+      calibre:
+        fx: DEBUG
+    org.hibernate.SQL: debug
+
+  file:
+    path: logs
+
+
+
+--- # EOD historical api
+
+eod:
+  api:
+    token: {PRIVATE TOKEN ID}
+
+
+
+
+
+--- # cron batch
+
+csv:
+  file:
+    directory: {LOCAL DIRECTORY}
+
+
+cron:
+  schedules:
+    - 0 0 8 * * ?   # 8AM every day
+    - 0 0 14 * * ?  # 2PM every day
+    - 0 0 16 * * ?  # 4PM every day
+#    - 0 * * * * ?  # test - every seconds
+#    - 0 * * * * ?  # test - every seconds

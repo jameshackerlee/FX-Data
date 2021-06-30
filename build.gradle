@@ -1,0 +1,45 @@
+plugins {
+  id 'org.springframework.boot' version '2.5.2'
+  id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+  id 'java'
+}
+
+group = 'com.calibre'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '1.8'
+
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+  implementation 'org.springframework.boot:spring-boot-starter-web'
+  implementation 'org.hibernate:hibernate-core:5.5.3.Final'
+  testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+  // mail
+  implementation 'org.springframework.boot:spring-boot-starter-mail'
+
+  // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-data-jpa
+  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: '2.5.2'
+
+  // mysql connector
+  implementation 'mysql:mysql-connector-java'
+
+  // apache poi excel
+  // implementation group: 'org.apache.poi', name: 'poi-ooxml', version: '4.1.2'
+  // csv file
+  // https://mvnrepository.com/artifact/net.sf.supercsv/super-csv
+  implementation group: 'net.sf.supercsv', name: 'super-csv', version: '2.3.1'
+
+  // lombok
+  compileOnly 'org.projectlombok:lombok:1.18.20'
+  annotationProcessor 'org.projectlombok:lombok:1.18.20'
+
+  testCompileOnly 'org.projectlombok:lombok:1.18.20'
+  testAnnotationProcessor 'org.projectlombok:lombok:1.18.20'
+}
+
+test {
+  useJUnitPlatform()
+}
