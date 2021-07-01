@@ -98,7 +98,7 @@ https://riptutorial.com/spring/example/21209/cron-expression
 ** I am concerned about the implementation and completion of the function and , so if I have time, I need clean and refactoring code.
 
 - Table schema
-please see calibre.sql and image files for design and analysis.
+please see calibre.sql and design.jpeg image files for design and analysis.
 
 insert
     into
